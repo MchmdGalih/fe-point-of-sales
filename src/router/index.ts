@@ -1,12 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
-import LoginPage from "../pages/auth/LoginPage.vue";
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: "/login",
-      name: "login",
-      component: LoginPage,
+      path: "/auth",
+      component: () => import("@/layouts/AuthLayout.vue"),
+      children: [
+        {
+          path: "login",
+          component: () => import("@/pages/auth/LoginPage.vue"),
+        },
+      ],
     },
   ],
 });
