@@ -2,6 +2,7 @@
 import { reactive, ref } from "vue";
 
 const form = reactive({
+  username: "",
   email: "",
   password: "",
 });
@@ -13,7 +14,7 @@ const handleTogglePassword = () => {
   visiblePassword.value = !visiblePassword.value;
 };
 
-const handleLogin = () => {
+const handleRegister = () => {
   isLoading.value = true;
   try {
     console.log(form);
@@ -25,7 +26,19 @@ const handleLogin = () => {
 </script>
 
 <template>
-  <form class="space-y-4" @submit.prevent="handleLogin">
+  <form class="space-y-4" @submit.prevent="handleRegister">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1"
+        >Username</label
+      >
+      <input
+        v-model="form.username"
+        type="text"
+        placeholder="username"
+        required
+        class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+    </div>
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
       <input
@@ -69,16 +82,16 @@ const handleLogin = () => {
       :disabled="isLoading"
       class="w-full cursor-pointer bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg transition"
     >
-      {{ isLoading ? "Loading..." : "Login" }}
+      {{ isLoading ? "Loading..." : "Register" }}
     </button>
 
     <div class="text-center">
       <p class="text-sm text-slate-500">
-        Don't have an account?
+        have an account?
         <RouterLink
-          to="/auth/register"
+          to="/auth/login"
           class="text-indigo-600 hover:text-indigo-700 transition"
-          >Register</RouterLink
+          >Login</RouterLink
         >
       </p>
     </div>

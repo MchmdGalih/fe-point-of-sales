@@ -8,7 +8,13 @@ const router = createRouter({
       children: [
         {
           path: "login",
+          name: "login",
           component: () => import("@/pages/auth/LoginPage.vue"),
+        },
+        {
+          path: "register",
+          name: "register",
+          component: () => import("@/pages/auth/RegisterPage.vue"),
         },
       ],
     },
