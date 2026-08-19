@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
+import { useAuthStore } from "../../stores/auth";
+import type { RegisterPayload } from "../../types/auth";
+import { useRouter } from "vue-router";
+import { useZodValidation } from "../../composables/useZodValidation";
+import { registerSchemas } from "../../schemas/auth.schema";
+import { toast } from "vue3-toastify";
 
-const form = reactive({
+const router = useRouter();
+const authStore = useAuthStore();
+const { errors, validate, clearErrors } = useZodValidation();
+
+const form = reactive<RegisterPayload>({
   username: "",
   email: "",
   password: "",
@@ -14,11 +24,30 @@ const handleTogglePassword = () => {
   visiblePassword.value = !visiblePassword.value;
 };
 
-const handleRegister = () => {
-  isLoading.value = true;
+const handleRegister = async () => {
+  const validation = validate(registerSchemas, form);
+
+  if (!validation.success) {
+    return;
+  }
+
   try {
-    console.log(form);
-  } catch (error) {
+    isLoading.value = true;
+
+    const response = await authStore.register(validation.data);
+    if (!response.success) {
+      toast.error(response.message);
+      return;
+    }
+
+    clearErrors();
+
+    router.push({
+      name: "login",
+      query: {
+        registered: "true",
+      },
+    });
   } finally {
     isLoading.value = false;
   }
@@ -38,6 +67,9 @@ const handleRegister = () => {
         required
         class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
+      <span v-if="errors.username" class="text-red-500 text-sm">
+        {{ errors.username }}
+      </span>
     </div>
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
@@ -48,6 +80,9 @@ const handleRegister = () => {
         required
         class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
+      <span v-if="errors.email" class="text-red-500 text-sm">
+        {{ errors.email }}
+      </span>
     </div>
 
     <div>
@@ -61,6 +96,10 @@ const handleRegister = () => {
         required
         class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
+
+      <span v-if="errors.password" class="text-red-500 text-sm">
+        {{ errors.password }}
+      </span>
 
       <div class="flex items-center mt-2">
         <input

@@ -1,10 +1,22 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
+import type { LoginPayload } from "../../types/auth";
+import { useZodValidation } from "../../composables/useZodValidation";
+import { loginSchemas } from "../../schemas/auth.schema";
+import { toast } from "vue3-toastify";
+import { useAuthStore } from "../../stores/auth";
+import { onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-const form = reactive({
+const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
+
+const form = reactive<LoginPayload>({
   email: "",
   password: "",
 });
+const { errors, validate, clearErrors } = useZodValidation();
 
 const visiblePassword = ref(false);
 const isLoading = ref(false);
@@ -13,15 +25,35 @@ const handleTogglePassword = () => {
   visiblePassword.value = !visiblePassword.value;
 };
 
-const handleLogin = () => {
-  isLoading.value = true;
+const handleLogin = async () => {
+  const validation = validate(loginSchemas, form);
+
+  if (!validation.success) {
+    return;
+  }
   try {
-    console.log(form);
-  } catch (error) {
+    isLoading.value = true;
+    const response = await authStore.login(validation.data);
+    if (!response.success) {
+      toast.error(response.message);
+      return;
+    }
+
+    toast.success(response.message);
+
+    clearErrors();
   } finally {
     isLoading.value = false;
   }
 };
+
+onMounted(() => {
+  if (route.query.registered === "true") {
+    toast.success("Registrasi berhasil, silahkan login");
+  }
+
+  router.replace({ path: route.path, query: {} });
+});
 </script>
 
 <template>
@@ -35,6 +67,9 @@ const handleLogin = () => {
         required
         class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
+      <span v-if="errors.email" class="text-red-500 text-sm">
+        {{ errors.email }}
+      </span>
     </div>
 
     <div>
@@ -62,6 +97,9 @@ const handleLogin = () => {
           >Show password</label
         >
       </div>
+      <span v-if="errors.password" class="text-red-500 text-sm">
+        {{ errors.password }}
+      </span>
     </div>
 
     <button

@@ -13,7 +13,10 @@ export interface RegisterPayload {
 
 export interface LoginResponse extends Users {
   accessToken: string;
-  refreshToken: string;
+}
+
+export interface RefreshTokenRespons {
+  accessToken: string;
 }
 
 export type RegisterResponse = Users;
@@ -22,6 +25,5 @@ export interface Users {
   id: string;
   username: string;
   email: string;
-  password: string;
   role: UserRole;
 }

@@ -23,7 +23,6 @@ const headerContent = computed(() => {
       };
   }
 });
-console.log(headerContent.value.title);
 </script>
 
 <template>
