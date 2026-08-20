@@ -1,4 +1,4 @@
-import { api } from "@/services/api";
+import { api, refreshApi } from "@/services/api";
 import type { LoginPayload, RegisterPayload, Users } from "@/types/auth";
 import { getApiErrorMessage } from "@/utils/api-errors";
 import { defineStore } from "pinia";
@@ -10,6 +10,10 @@ export const useAuthStore = defineStore(
     const users = ref<Users | null>(null);
     const accessToken = ref<string | null>(null);
     const isAuthenticated = computed(() => !!accessToken.value);
+
+    function setAccessToken(token: string) {
+      accessToken.value = token;
+    }
 
     async function register(payload: RegisterPayload) {
       try {
@@ -35,7 +39,7 @@ export const useAuthStore = defineStore(
 
         const { data, message } = response.data;
 
-        accessToken.value = data.accessToken;
+        setAccessToken(data.accessToken);
 
         users.value = {
           id: data.id,
@@ -56,12 +60,41 @@ export const useAuthStore = defineStore(
       }
     }
 
+    async function refreshToken() {
+      try {
+        console.log("refresh token dimulai!");
+
+        const response = await refreshApi.post("/auth/refresh-token");
+
+        const { data } = response.data;
+        console.log("response data", data);
+
+        const newAccessToken = data.accessToken;
+
+        setAccessToken(newAccessToken);
+        console.log("new access token", newAccessToken);
+
+        return {
+          success: true,
+          accessToken: newAccessToken,
+        };
+      } catch (error) {
+        console.log("error", error);
+        return {
+          success: false,
+          message: getApiErrorMessage(error),
+        };
+      }
+    }
+
     return {
       register,
       accessToken,
       login,
       users,
       isAuthenticated,
+      setAccessToken,
+      refreshToken,
     };
   },
   {
