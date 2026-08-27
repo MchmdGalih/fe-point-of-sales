@@ -11,7 +11,7 @@ export const useAuthStore = defineStore(
     const accessToken = ref<string | null>(null);
     const isAuthenticated = computed(() => !!accessToken.value);
 
-    function setAccessToken(token: string) {
+    function setAccessToken(token: string | null) {
       accessToken.value = token;
     }
 
@@ -79,7 +79,25 @@ export const useAuthStore = defineStore(
           accessToken: newAccessToken,
         };
       } catch (error) {
-        console.log("error", error);
+        return {
+          success: false,
+          message: getApiErrorMessage(error),
+        };
+      }
+    }
+
+    async function logout() {
+      try {
+        const response = await api.post("/auth/logout");
+        const { message } = response.data;
+        setAccessToken(null);
+        accessToken.value = null;
+        users.value = null;
+        return {
+          success: true,
+          message,
+        };
+      } catch (error) {
         return {
           success: false,
           message: getApiErrorMessage(error),
@@ -95,6 +113,7 @@ export const useAuthStore = defineStore(
       isAuthenticated,
       setAccessToken,
       refreshToken,
+      logout,
     };
   },
   {

@@ -1,17 +1,45 @@
-<script lang="ts"></script>
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
+import SideBar from "../components/dashboard/SideBar.vue";
+import { useRoute, useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
+
+const route = useRoute();
+const router = useRouter();
+const isSidebarCollapse = ref<boolean>(false);
+
+const toggleSidebar = () => {
+  isSidebarCollapse.value = !isSidebarCollapse.value;
+};
+
+onMounted(() => {
+  if (route.query.login === "true") {
+    toast.success("Login berhasil");
+  }
+
+  router.replace({ path: route.path, query: {} });
+});
+</script>
 
 <template>
   <div class="min-h-screen">
     <div class="flex min-h-screen">
       <!-- SIDEBAR! -->
-      <aside class="w-64 shrink-0 border-r border-secondary">SIDEBAR</aside>
+      <aside
+        :class="[
+          'hidden shrink-0 bg-white transition-[width] duration-400 lg:block shadow-lg',
+          isSidebarCollapse ? 'w-30' : 'w-64',
+        ]"
+      >
+        <SideBar
+          :collapsed="isSidebarCollapse"
+          @toggle-collapse="toggleSidebar"
+        />
+      </aside>
       <!-- MAIN AREA -->
       <div class="flex min-w-0 flex-1 flex-col">
-        <!-- HEADER -->
-        <header class="h-16 shrink-0 border-b border-secondary">HEADER</header>
-
         <!-- CONTENT -->
-        <main class="flex-1 p-6 border-2">
+        <main class="flex-1 p-6">
           <RouterView />
         </main>
       </div>

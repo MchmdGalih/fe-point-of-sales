@@ -33,13 +33,20 @@ const handleLogin = async () => {
   }
   try {
     isLoading.value = true;
+
     const response = await authStore.login(validation.data);
+
     if (!response.success) {
       toast.error(response.message);
       return;
     }
 
-    toast.success(response.message);
+    router.push({
+      name: "dashboard",
+      query: {
+        login: "true",
+      },
+    });
 
     clearErrors();
   } finally {
