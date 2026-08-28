@@ -25,6 +25,9 @@ api.interceptors.request.use(
   (config) => {
     const authStore = useAuthStore();
 
+    console.log(" request:", config.method?.toUpperCase(), config.url);
+    console.log(" accessTokon:", authStore.accessToken);
+
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`;
     }
@@ -35,14 +38,20 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
   (response) => {
+    console.log("response:", response.config.url, response.status);
+
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as RetryableRequestConfig;
+    console.log("ERROR:", error.config?.url, error.response?.status);
+
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
 
     if (error.response?.status !== 401) return Promise.reject(error);
 
-    if (originalRequest?._retry) return Promise.reject(error);
+    console.log("ACCESS TOKEN EXPIRED → REFRESHING...");
+
+    if (!originalRequest?._retry) return Promise.reject(error);
 
     originalRequest._retry = true;
 
@@ -50,9 +59,18 @@ api.interceptors.response.use(
 
     const result = await authStore.refreshToken();
 
-    if (!result.success) return Promise.reject(error);
+    console.log("REFRESH RESULT:", result);
+
+    if (!result.success) {
+      console.log("refresh token error");
+      return Promise.reject(error);
+    }
+
+    console.log("retry request", originalRequest.url);
 
     originalRequest.headers.Authorization = `Bearer ${result.accessToken}`;
+
+    console.log("new access token", result.accessToken);
 
     return api.request(originalRequest);
   },

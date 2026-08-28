@@ -27,7 +27,7 @@ onMounted(() => {
       <!-- SIDEBAR! -->
       <aside
         :class="[
-          'hidden shrink-0 bg-white transition-[width] duration-400 lg:block shadow-lg',
+          'shrink-0 bg-white transition-[width] duration-400 lg:block shadow-lg',
           isSidebarCollapse ? 'w-30' : 'w-64',
         ]"
       >

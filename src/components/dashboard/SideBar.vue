@@ -1,19 +1,23 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import {
   ShoppingCart,
   Package,
   Receipt,
-  Users,
   BarChart3,
   LogOut,
   UserCog,
   CircleChevronLeft,
   Loader2,
+  ClipboardList,
 } from "lucide-vue-next";
+import { useAuthStore } from "../../stores/auth";
+import { useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
 
-import { ref } from "vue";
-
+const authStore = useAuthStore();
 const isLoading = ref<boolean>(false);
+const router = useRouter();
 
 const props = defineProps<{
   collapsed: boolean;
@@ -31,9 +35,9 @@ const menuItems = [
     icon: Package,
   },
   {
-    label: "Pelanggan",
+    label: "Orders",
     path: "/",
-    icon: Users,
+    icon: ClipboardList,
   },
   {
     label: "Transaksi",
@@ -59,6 +63,19 @@ const emit = defineEmits<{
 const handleSignOut = async () => {
   try {
     isLoading.value = true;
+    const response = await authStore.logout();
+
+    if (!response.success) {
+      toast.error(response.message);
+      return;
+    }
+
+    router.push({
+      name: "login",
+      query: {
+        logout: "true",
+      },
+    });
   } finally {
     isLoading.value = false;
   }

@@ -59,6 +59,10 @@ onMounted(() => {
     toast.success("Registrasi berhasil, silahkan login");
   }
 
+  if (route.query.logout === "true") {
+    toast.success("Logout berhasil");
+  }
+
   router.replace({ path: route.path, query: {} });
 });
 </script>
