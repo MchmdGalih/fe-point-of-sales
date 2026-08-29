@@ -7,11 +7,11 @@ import { computed, ref } from "vue";
 export const useAuthStore = defineStore(
   "auth",
   () => {
-    const users = ref<Users | null>(null);
+    const user = ref<Users | null>(null);
     const accessToken = ref<string | null>(null);
     const isAuthenticated = computed(() => !!accessToken.value);
 
-    function setAccessToken(token: string | null) {
+    function setAccessToken(token: string | null): void {
       accessToken.value = token;
     }
 
@@ -39,9 +39,11 @@ export const useAuthStore = defineStore(
 
         const { data, message } = response.data;
 
-        setAccessToken(data.accessToken);
+        const accessToken = data.accessToken;
 
-        users.value = {
+        setAccessToken(accessToken);
+
+        user.value = {
           id: data.id,
           username: data.username,
           email: data.email,
@@ -93,7 +95,7 @@ export const useAuthStore = defineStore(
         const { message } = response.data;
         setAccessToken(null);
         accessToken.value = null;
-        users.value = null;
+        user.value = null;
         return {
           success: true,
           message,
@@ -110,7 +112,7 @@ export const useAuthStore = defineStore(
       register,
       accessToken,
       login,
-      users,
+      user,
       isAuthenticated,
       setAccessToken,
       refreshToken,
@@ -119,7 +121,7 @@ export const useAuthStore = defineStore(
   },
   {
     persist: {
-      pick: ["accessToken", "users"],
+      pick: ["accessToken", "user"],
     },
   },
 );

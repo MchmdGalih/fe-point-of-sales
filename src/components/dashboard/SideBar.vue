@@ -4,12 +4,12 @@ import {
   ShoppingCart,
   Package,
   Receipt,
-  BarChart3,
   LogOut,
   UserCog,
   CircleChevronLeft,
   Loader2,
   ClipboardList,
+  Home,
 } from "lucide-vue-next";
 import { useAuthStore } from "../../stores/auth";
 import { useRouter } from "vue-router";
@@ -25,6 +25,11 @@ const props = defineProps<{
 
 const menuItems = [
   {
+    label: "Beranda",
+    path: "/",
+    icon: Home,
+  },
+  {
     label: "Kasir",
     path: "/",
     icon: ShoppingCart,
@@ -36,18 +41,13 @@ const menuItems = [
   },
   {
     label: "Orders",
-    path: "/",
+    path: "/orders",
     icon: ClipboardList,
   },
   {
     label: "Transaksi",
     path: "/",
     icon: Receipt,
-  },
-  {
-    label: "Laporan",
-    path: "/",
-    icon: BarChart3,
   },
   {
     label: "Users",
@@ -89,9 +89,7 @@ const handleSignOut = async () => {
         <!-- Logo -->
         <div
           class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold"
-        >
-          P
-        </div>
+        ></div>
 
         <!-- App Name -->
         <span
@@ -125,10 +123,9 @@ const handleSignOut = async () => {
         :key="item.path"
         :to="item.path"
         :class="[
-          'flex items-center rounded-lg py-2.5 mb-2',
+          'flex items-center rounded-lg py-2.5 mb-2 border border-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer',
           collapsed ? 'justify-center px-2' : 'gap-3 px-3',
         ]"
-        active-class="bg-indigo-700 text-white"
       >
         <component :is="item.icon" class="h-5 w-5 shrink-0" />
 

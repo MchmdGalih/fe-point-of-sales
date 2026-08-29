@@ -7,6 +7,7 @@ import { toast } from "vue3-toastify";
 import { useAuthStore } from "../../stores/auth";
 import { onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import Input from "@/components/ui/input/Input.vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -71,13 +72,14 @@ onMounted(() => {
   <form class="space-y-4" @submit.prevent="handleLogin">
     <div>
       <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-      <input
+      <!-- <input
         v-model="form.email"
         type="email"
         placeholder="email@contoh.com"
         required
         class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
+      /> -->
+      <Input v-model="form.email" type="email" />
       <span v-if="errors.email" class="text-red-500 text-sm">
         {{ errors.email }}
       </span>

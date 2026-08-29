@@ -26,7 +26,7 @@ api.interceptors.request.use(
     const authStore = useAuthStore();
 
     console.log(" request:", config.method?.toUpperCase(), config.url);
-    console.log(" accessTokon:", authStore.accessToken);
+    console.log(" accessTokenn:", authStore.accessToken);
 
     if (authStore.accessToken) {
       config.headers.Authorization = `Bearer ${authStore.accessToken}`;

@@ -8,7 +8,7 @@ const route = useRoute();
 const router = useRouter();
 const isSidebarCollapse = ref<boolean>(false);
 
-const toggleSidebar = () => {
+const toggleSidebar = (): void => {
   isSidebarCollapse.value = !isSidebarCollapse.value;
 };
 
@@ -27,7 +27,7 @@ onMounted(() => {
       <!-- SIDEBAR! -->
       <aside
         :class="[
-          'shrink-0 bg-white transition-[width] duration-400 lg:block shadow-lg',
+          'shrink-0 bg-white transition-[width] duration-400 lg:block shadow-2xl rounded-md',
           isSidebarCollapse ? 'w-30' : 'w-64',
         ]"
       >
@@ -39,7 +39,7 @@ onMounted(() => {
       <!-- MAIN AREA -->
       <div class="flex min-w-0 flex-1 flex-col">
         <!-- CONTENT -->
-        <main class="flex-1 p-6">
+        <main class="flex-1 p-4 bg-gray-100">
           <RouterView />
         </main>
       </div>
