@@ -83,12 +83,12 @@ const handleSignOut = async () => {
 </script>
 
 <template>
-  <aside class="flex flex-col h-full">
-    <div class="flex h-16 items-center justify-between px-4">
+  <aside class="flex flex-col h-full bg-gray-50 rounded-md shadow-md">
+    <header class="flex h-16 items-center justify-between px-4 border-b">
       <div class="flex items-center gap-3">
         <!-- Logo -->
         <div
-          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold"
+          class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-800 text-white font-bold"
         ></div>
 
         <!-- App Name -->
@@ -113,7 +113,7 @@ const handleSignOut = async () => {
           ]"
         />
       </button>
-    </div>
+    </header>
 
     <!-- Navigation list dashboard! -->
     <nav class="flex-1 space-y-1 px-3 py-2">
@@ -123,7 +123,7 @@ const handleSignOut = async () => {
         :key="item.path"
         :to="item.path"
         :class="[
-          'flex items-center rounded-lg py-2.5 mb-2 border border-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer',
+          'flex items-center rounded-lg py-2.5 mb-2 border border-gray-300 bg-indigo-700 text-white hover:bg-indigo-900 hover:text-white transform transition-color cursor-pointer',
           collapsed ? 'justify-center px-2' : 'gap-3 px-3',
         ]"
       >
@@ -136,13 +136,13 @@ const handleSignOut = async () => {
     </nav>
 
     <!-- Logout -->
-    <div class="p-2">
+    <div class="p-2 border-t">
       <button
         :disabled="isLoading"
         @click="handleSignOut"
         type="button"
         :class="[
-          'mt-1 flex w-full items-center rounded-lg py-2.5 text-white cursor-pointer bg-red-700',
+          'mt-1 flex w-full items-center rounded-lg py-2.5 hover:text-white hover:bg-indigo-900 transform transition-colors cursor-pointer ',
           collapsed ? 'justify-center px-2' : 'gap-3 px-3',
         ]"
       >

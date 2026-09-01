@@ -6,6 +6,7 @@ import { useRouter } from "vue-router";
 import { useZodValidation } from "../../composables/useZodValidation";
 import { registerSchemas } from "../../schemas/auth.schema";
 import { toast } from "vue3-toastify";
+import PasswordInput from "@/components/ui/password-input/PasswordInput.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -17,12 +18,7 @@ const form = reactive<RegisterPayload>({
   password: "",
 });
 
-const visiblePassword = ref(false);
 const isLoading = ref(false);
-
-const handleTogglePassword = () => {
-  visiblePassword.value = !visiblePassword.value;
-};
 
 const handleRegister = async () => {
   const validation = validate(registerSchemas, form);
@@ -89,31 +85,10 @@ const handleRegister = async () => {
       <label class="block text-sm font-medium text-slate-700 mb-1"
         >Password</label
       >
-      <input
-        v-model="form.password"
-        :type="visiblePassword ? 'text' : 'password'"
-        placeholder="••••••••"
-        required
-        class="w-full border border-slate-200 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
-
+      <PasswordInput v-model="form.password" placeholder="••••••••" />
       <span v-if="errors.password" class="text-red-500 text-sm">
         {{ errors.password }}
       </span>
-
-      <div class="flex items-center mt-2">
-        <input
-          id="show-password"
-          type="checkbox"
-          class="w-4 h-4 text-indigo-600 bg-gray-100 border-gray-300 rounded focus:ring-indigo-500"
-          @change="handleTogglePassword"
-        />
-        <label
-          for="show-password"
-          class="ml-2 text-sm font-medium text-gray-900"
-          >Show password</label
-        >
-      </div>
     </div>
 
     <button

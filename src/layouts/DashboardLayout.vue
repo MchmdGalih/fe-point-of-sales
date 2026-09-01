@@ -27,7 +27,7 @@ onMounted(() => {
       <!-- SIDEBAR! -->
       <aside
         :class="[
-          'shrink-0 bg-white transition-[width] duration-400 lg:block shadow-2xl rounded-md',
+          'shrink-0 bg-white p-2 transition-[width] duration-400 lg:block ',
           isSidebarCollapse ? 'w-30' : 'w-64',
         ]"
       >
@@ -39,7 +39,7 @@ onMounted(() => {
       <!-- MAIN AREA -->
       <div class="flex min-w-0 flex-1 flex-col">
         <!-- CONTENT -->
-        <main class="flex-1 p-4 bg-gray-100">
+        <main class="flex-1 p-2">
           <RouterView />
         </main>
       </div>

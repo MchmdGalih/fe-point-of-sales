@@ -1,318 +1,149 @@
 <script setup lang="ts">
-import type { RowSelectionState } from "@tanstack/vue-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "@lucide/vue";
-import {
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  createColumnHelper,
-  createExpandedRowModel,
-  createFilteredRowModel,
-  createPaginatedRowModel,
-  createSortedRowModel,
-  filterFn_includesString,
-  FlexRender,
-  rowExpandingFeature,
-  rowPaginationFeature,
-  rowSelectionFeature,
-  rowSortingFeature,
-  sortFn_alphanumeric,
-  sortFn_text,
-  tableFeatures,
-  useTable,
-} from "@tanstack/vue-table";
-import { createReusableTemplate } from "@vueuse/core";
-import { h, ref } from "vue";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+import { computed, onMounted, ref, watch } from "vue";
+import { useOrdersStore } from "@/stores/orders";
+import SearchInput from "@/components/ui/search-input/SearchInput.vue";
 import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { getOrderStatusVariant } from "@/helper/order-helper";
+import { formatDate } from "@/utils/format-date";
+import { formatCurrency } from "@/utils/format-currency";
+import type { Order } from "@/types/order";
+import { useDebounceFn } from "@vueuse/core";
 
-export interface Payment {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
-}
-
-const data: Payment[] = [
+const columns = [
   {
-    id: "m5gr84i9",
-    amount: 316,
-    status: "success",
-    email: "ken99@yahoo.com",
+    key: "orderNumber",
+    label: "Order ID",
   },
   {
-    id: "3u1reuv4",
-    amount: 242,
-    status: "success",
-    email: "Abe45@gmail.com",
+    key: "customerName",
+    label: "Customer",
   },
   {
-    id: "derv1ws0",
-    amount: 837,
-    status: "processing",
-    email: "Monserrat44@gmail.com",
+    key: "itemsCount",
+    label: "Items",
   },
   {
-    id: "5kma53ae",
-    amount: 874,
-    status: "success",
-    email: "Silas22@gmail.com",
+    key: "totalAmount",
+    label: "Total",
   },
   {
-    id: "bhqecj4p",
-    amount: 721,
-    status: "failed",
-    email: "carmella@hotmail.com",
+    key: "status",
+    label: "Status",
+  },
+  {
+    key: "createdAt",
+    label: "Date",
   },
 ];
 
-const [DefineTemplate, ReuseTemplate] = createReusableTemplate<{
-  payment: {
-    id: string;
-  };
-  onExpand: () => void;
-}>();
+const orderStore = useOrdersStore();
+const search = ref<string>("");
 
-// New in v9: declare the features this table uses — anything you don't
-// register is tree-shaken out of the bundle.
-const features = tableFeatures({
-  columnFilteringFeature,
-  columnVisibilityFeature,
-  rowExpandingFeature,
-  rowPaginationFeature,
-  rowSelectionFeature,
-  rowSortingFeature,
-  expandedRowModel: createExpandedRowModel(),
-  filteredRowModel: createFilteredRowModel(),
-  paginatedRowModel: createPaginatedRowModel(),
-  sortedRowModel: createSortedRowModel(),
-  filterFns: { includesString: filterFn_includesString },
-  sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
-});
+const orderDataTable = computed(() => {
+  const keyword = search.value.toLowerCase().trim();
 
-const columnHelper = createColumnHelper<typeof features, Payment>();
-
-const columns = columnHelper.columns([
-  columnHelper.display({
-    id: "select",
-    header: ({ table }) =>
-      h(Checkbox, {
-        modelValue:
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate"),
-        "onUpdate:modelValue": (value: boolean | "indeterminate") =>
-          table.toggleAllPageRowsSelected(!!value),
-        ariaLabel: "Select all",
-      }),
-    cell: ({ row }) =>
-      h(Checkbox, {
-        modelValue: row.getIsSelected(),
-        "onUpdate:modelValue": (value: boolean | "indeterminate") =>
-          row.toggleSelected(!!value),
-        ariaLabel: "Select row",
-      }),
-    enableSorting: false,
-    enableHiding: false,
-  }),
-  columnHelper.accessor("status", {
-    header: "Status",
-    cell: ({ row }) =>
-      h("div", { class: "capitalize" }, row.getValue("status")),
-  }),
-  columnHelper.accessor("email", {
-    header: ({ column }) => {
-      return h(
-        Button,
-        {
-          variant: "ghost",
-          onClick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-        },
-        () => ["Email", h(ArrowUpDown, { class: "ml-2 h-4 w-4" })],
+  return orderStore.orders
+    .filter((order: Order) => {
+      return (
+        order.orderNumber.toLowerCase().includes(keyword) ||
+        order.customerName.toLowerCase().includes(keyword)
       );
-    },
-    cell: ({ row }) => h("div", { class: "lowercase" }, row.getValue("email")),
-  }),
-  columnHelper.accessor("amount", {
-    header: () => h("div", { class: "text-right" }, "Amount"),
-    cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue("amount"));
-
-      // Format the amount as a dollar amount
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return h("div", { class: "text-right font-medium" }, formatted);
-    },
-  }),
-  columnHelper.display({
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const payment = row.original;
-
-      return h(ReuseTemplate, {
-        payment,
-        onExpand: () => row.toggleExpanded(),
-      });
-    },
-  }),
-]);
-
-// Keep row selection outside the table so the rest of the app can read or update it.
-const rowSelection = ref<RowSelectionState>({});
-
-const table = useTable({
-  features,
-  data,
-  columns,
-  state: {
-    get rowSelection() {
-      return rowSelection.value;
-    },
-  },
-  onRowSelectionChange: (updater) => {
-    rowSelection.value =
-      typeof updater === "function" ? updater(rowSelection.value) : updater;
-  },
+    })
+    .map((order: Order) => {
+      return {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: order.customerName,
+        itemsCount: order.itemsCount,
+        totalAmount: order.totalAmount,
+        status: order.status,
+        createdAt: order.createdAt,
+      };
+    });
 });
 
-function copy(id: string) {
-  navigator.clipboard.writeText(id);
-}
+const debouncedSearch = useDebounceFn(() => {
+  orderStore.getAllOrders({
+    search: search.value,
+    page: 1,
+    limit: orderStore.meta.limit,
+  });
+}, 500);
+
+watch(search, debouncedSearch);
+
+onMounted(async () => {
+  await orderStore.getAllOrders({
+    page: 1,
+    limit: 10,
+  });
+});
 </script>
 
 <template>
-  <DefineTemplate v-slot="{ payment }">
-    <DropdownMenu>
-      <DropdownMenuTrigger as-child>
-        <Button variant="ghost" class="h-8 w-8 p-0">
-          <span class="sr-only">Open menu</span>
-          <MoreHorizontal class="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuItem @click="copy(payment.id)">
-          Copy payment ID
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>View customer</DropdownMenuItem>
-        <DropdownMenuItem>View payment details</DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  </DefineTemplate>
-  <div class="w-full">
-    <div class="flex items-center py-4">
-      <Input
-        class="max-w-sm"
-        placeholder="Filter emails..."
-        :model-value="table.getColumn('email')?.getFilterValue()"
-        @update:model-value="table.getColumn('email')?.setFilterValue($event)"
-      />
-      <DropdownMenu>
-        <DropdownMenuTrigger as-child>
-          <Button variant="outline" class="ml-auto">
-            Columns <ChevronDown class="ml-2 h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuCheckboxItem
-            v-for="column in table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())"
-            :key="column.id"
-            class="capitalize"
-            :model-value="column.getIsVisible()"
-            @update:model-value="
-              (value) => {
-                column.toggleVisibility(!!value);
-              }
-            "
-          >
-            {{ column.id }}
-          </DropdownMenuCheckboxItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+  <div
+    class="h-full space-y-6 flex flex-col gap-4 p-4 bg-gray-50 rounded-md shadow-md"
+  >
+    <div class="space-y-1">
+      <h1 class="font-bold text-4xl">Orders</h1>
+      <p class="font-semibold">Manage and track all customer orders</p>
     </div>
-    <div class="rounded-md border">
+
+    <SearchInput
+      v-model="search"
+      class="w-full shadow-xs"
+      placeholder="Cari order number atau customer name..."
+    />
+
+    <div class="overflow-hidden shadow-xs">
       <Table>
         <TableHeader>
-          <TableRow
-            v-for="headerGroup in table.getHeaderGroups()"
-            :key="headerGroup.id"
-          >
-            <TableHead v-for="header in headerGroup.headers" :key="header.id">
-              <FlexRender v-if="!header.isPlaceholder" :header="header" />
-            </TableHead>
+          <TableRow>
+            <TableHead
+              v-for="column in columns"
+              :key="column.key"
+              class="border px-2 py-2 font-bold bg-slate-50"
+              >{{ column.label }}</TableHead
+            >
           </TableRow>
         </TableHeader>
-        <TableBody>
-          <template v-if="table.getRowModel().rows?.length">
-            <template v-for="row in table.getRowModel().rows" :key="row.id">
-              <TableRow :data-state="row.getIsSelected() && 'selected'">
-                <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
-                  <FlexRender :cell="cell" />
-                </TableCell>
-              </TableRow>
-              <TableRow v-if="row.getIsExpanded()">
-                <TableCell :colspan="row.getAllCells().length">
-                  {{ JSON.stringify(row.original) }}
-                </TableCell>
-              </TableRow>
-            </template>
-          </template>
+        <TableBody class="border-2">
+          <TableRow v-for="order in orderDataTable" :key="order.id">
+            <TableCell class="border">{{ order.orderNumber }}</TableCell>
+            <TableCell class="border">{{ order.customerName }}</TableCell>
+            <TableCell class="border">{{ order.itemsCount }}</TableCell>
+            <TableCell class="border">{{
+              formatCurrency(order.totalAmount)
+            }}</TableCell>
+            <TableCell class="border">
+              <Badge
+                :variant="getOrderStatusVariant(order.status)"
+                class="bg-green-600"
+                >{{ order.status }}</Badge
+              >
+            </TableCell>
+            <TableCell class="border">{{
+              formatDate(order.createdAt)
+            }}</TableCell>
+          </TableRow>
 
-          <TableRow v-else>
+          <TableRow v-if="orderDataTable.length === 0">
             <TableCell :colspan="columns.length" class="h-24 text-center">
-              No results.
+              Tidak ada order ditemukan.
             </TableCell>
           </TableRow>
         </TableBody>
+        <TableFooter> </TableFooter>
       </Table>
-    </div>
-
-    <div class="flex items-center justify-end space-x-2 py-4">
-      <div class="flex-1 text-sm text-muted-foreground">
-        {{ table.getFilteredSelectedRowModel().rows.length }} of
-        {{ table.getFilteredRowModel().rows.length }} row(s) selected.
-      </div>
-      <div class="space-x-2">
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanPreviousPage()"
-          @click="table.previousPage()"
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          :disabled="!table.getCanNextPage()"
-          @click="table.nextPage()"
-        >
-          Next
-        </Button>
-      </div>
     </div>
   </div>
 </template>

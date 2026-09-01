@@ -1,8 +1,8 @@
+import { defineStore } from "pinia";
+import { computed, ref } from "vue";
 import { api, refreshApi } from "@/services/api";
 import type { LoginPayload, RegisterPayload, Users } from "@/types/auth";
 import { getApiErrorMessage } from "@/utils/api-errors";
-import { defineStore } from "pinia";
-import { computed, ref } from "vue";
 
 export const useAuthStore = defineStore(
   "auth",
