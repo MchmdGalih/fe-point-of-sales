@@ -18,10 +18,10 @@ export const useOrdersStore = defineStore("orders", () => {
       const response = await api.get("/order", {
         params,
       });
-      const { data, message, meta } = response.data;
+      const { data, message, meta: responseMeta } = response.data;
 
       orders.value = data;
-      meta.value = meta;
+      meta.value = responseMeta;
       return {
         success: true,
         message,

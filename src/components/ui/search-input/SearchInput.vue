@@ -21,7 +21,8 @@ const modelValue = useVModel(props, "modelValue", emit, {
 <template>
   <div :class="['relative', props.class]">
     <Search
-      class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+      class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+      color="blue"
     />
 
     <Input
