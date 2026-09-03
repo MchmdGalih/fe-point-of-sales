@@ -83,7 +83,7 @@ const handleSignOut = async () => {
 </script>
 
 <template>
-  <aside class="flex flex-col h-full bg-gray-50 rounded-md shadow-md">
+  <aside class="flex flex-col h-full px-2 py-2 border-r rounded-md">
     <header class="flex h-16 items-center justify-between px-4 border-b">
       <div class="flex items-center gap-3">
         <!-- Logo -->
@@ -117,7 +117,14 @@ const handleSignOut = async () => {
 
     <!-- Navigation list dashboard! -->
     <nav class="flex-1 space-y-1 px-3 py-2">
-      <p class="font-semibold text-sm text-gray-400 mt-2 mb-4">MENU UTAMA</p>
+      <p
+        :class="[
+          'font-semibold  text-gray-400 mt-2 mb-4',
+          collapsed ? 'text-xs' : 'text-sm',
+        ]"
+      >
+        MENU UTAMA
+      </p>
       <RouterLink
         v-for="item in menuItems"
         :key="item.path"

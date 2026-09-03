@@ -17,17 +17,26 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { computed, useSlots } from "vue";
 
-defineProps<{
+const props = defineProps<{
   columns: DataTableColumn<T>[];
   data: T[];
-  meta: DataTableMeta;
-  loading: boolean;
+  meta?: DataTableMeta;
+  loading?: boolean;
 }>();
+
+const slots = useSlots();
+
+const totalColomn = computed(() => {
+  return props.columns.length + (slots.actions ? 1 : 0);
+});
 
 const emit = defineEmits<{
   (e: "on-page-change", page: number): void;
 }>();
+
+const handlePageChange = (page: number) => emit("on-page-change", page);
 </script>
 
 <template>
@@ -38,13 +47,13 @@ const emit = defineEmits<{
         <TableHead
           v-for="column in columns"
           :key="column.key"
-          class="border px-2 py-2 font-bold bg-slate-50"
+          class="px-4 py-4 font-bold bg-slate-100"
           >{{ column.label }}</TableHead
         >
 
         <TableHead
           v-if="$slots.actions"
-          class="border px-2 py-2 font-bold bg-slate-50"
+          class="px-4 py-4 font-bold bg-slate-100"
         >
           Actions
         </TableHead>
@@ -83,16 +92,16 @@ const emit = defineEmits<{
 
       <!-- Empty -->
       <TableRow v-else>
-        <TableCell :colspan="columns.length" class="h-24 text-center">
+        <TableCell :colspan="totalColomn" class="h-24 text-center">
           Tidak ada order ditemukan.
         </TableCell>
       </TableRow>
     </TableBody>
 
     <!-- Footer -->
-    <TableFooter class="border">
-      <TableCell :colspan="columns.length" class="w-full">
-        <div class="flex items-center justify-between">
+    <TableFooter class="border bg-slate-100" v-if="meta">
+      <TableCell :colspan="totalColomn" class="w-full">
+        <div class="flex items-center justify-between" v-if="meta">
           <p class="text-xs text-slate-500">
             Showing
             <span class="font-bold">
@@ -110,13 +119,14 @@ const emit = defineEmits<{
           </p>
 
           <Pagination
+            v-if="meta"
             class="flex items-center space-x-2 justify-end"
             :page="meta.page"
             :total="meta.totalData"
             :items-per-page="meta.limit"
             :sibling-count="1"
             show-edges
-            @update:page="emit('on-page-change', $event)"
+            @update:page="handlePageChange"
           >
             <PaginationContent v-slot="{ items }">
               <PaginationPrevious />

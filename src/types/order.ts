@@ -14,6 +14,16 @@ export interface Order {
   createdAt: string;
 }
 
+export interface OrderDetail extends Order {
+  orderItems: OrderItem[];
+}
+
+export interface OrderItem {
+  quantity: number;
+  price: number;
+  productName: string;
+  subtotal: number;
+}
 export interface OrdersParams {
   search?: string;
   page?: number;
