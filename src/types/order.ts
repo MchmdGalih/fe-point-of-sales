@@ -1,3 +1,5 @@
+import type { Payment } from "./payment";
+
 export type OrderStatus = "COMPLETED" | "PENDING" | "CANCELED";
 
 export interface Order {
@@ -16,6 +18,7 @@ export interface Order {
 
 export interface OrderDetail extends Order {
   orderItems: OrderItem[];
+  payment: Payment;
 }
 
 export interface OrderItem {

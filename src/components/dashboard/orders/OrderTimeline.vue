@@ -16,7 +16,7 @@ import { ORDER_STEPS } from "@/const/order";
 import { computed } from "vue";
 
 const props = defineProps<{
-  status: OrderStatus | null;
+  status: OrderStatus;
 }>();
 
 const currentStep = computed(() => {

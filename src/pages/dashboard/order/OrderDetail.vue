@@ -11,6 +11,7 @@ import { formatCurrency } from "@/utils/format-currency";
 import OrderCustomerCard from "@/components/dashboard/orders/OrderCustomerCard.vue";
 import OrderCashierCard from "@/components/dashboard/orders/OrderCashierCard.vue";
 import OrderTimeline from "@/components/dashboard/orders/OrderTimeline.vue";
+import OrderPaymentCard from "@/components/dashboard/orders/OrderPaymentCard.vue";
 
 const route = useRoute();
 const detailOrder = ref<OrderDetail | null>(null);
@@ -29,9 +30,27 @@ const cashierName = computed(() => {
 });
 
 const orderStatus = computed(() => {
-  return detailOrder.value?.status ?? null;
+  return detailOrder.value?.status ?? "PENDING";
 });
 
+const paymentSummary = computed(() => {
+  const dataPayment = detailOrder?.value?.payment;
+
+  if (!dataPayment) return null;
+
+  return {
+    id: dataPayment.id,
+    orderId: dataPayment.orderId,
+    method: dataPayment.method,
+    amount: dataPayment.amount,
+    change: dataPayment.change,
+    paymentNumber: dataPayment.paymentNumber,
+    providerTransactiondId: dataPayment.providerTransactionId,
+    providerPaymentType: dataPayment.providerPaymentType,
+    status: dataPayment.status,
+    paidAt: dataPayment.paidAt,
+  };
+});
 const fetchOrderDetail = async () => {
   try {
     const response = await api.get(`/order/${route.params.id}`);
@@ -52,9 +71,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="px-6 py-4 h-full">
-    <div class="grid grid-cols-4 gap-4">
-      <div class="col-span-3">
+  <div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      <div class="lg:col-span-9">
         <!-- Header Order Detail -->
         <div
           class="flex items-center gap-2 px-1 py-2 bg-slate-100 border-t border-r border-l"
@@ -94,15 +113,30 @@ onMounted(() => {
             {{ formatCurrency(row.subtotal) }}
           </template>
         </DataTable>
-      </div>
-      <div class="col-span-1 space-y-4">
-        <!-- Card Customer -->
-        <OrderCustomerCard :customerName="customerName" />
 
+        
+      </div>
+      <div class="lg:col-span-3">
+        <OrderPaymentCard
+          v-if="paymentSummary"
+          :data="paymentSummary"
+          :totalAmount="detailOrder?.totalAmount ?? 0"
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div class="md:col-span-1 lg:col-span-4">
         <!-- Card Cashier -->
         <OrderCashierCard :cashierName="cashierName" />
+      </div>
 
-        <!-- Card TimeLine -->
+      <div class="md:col-span-1 lg:col-span-4">
+        <!-- Card Customer -->
+        <OrderCustomerCard :customerName="customerName" />
+      </div>
+      <!-- Card TimeLine -->
+      <div class="md:col-span-1 lg:col-span-4">
         <OrderTimeline :status="orderStatus" />
       </div>
     </div>
