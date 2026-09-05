@@ -34,11 +34,17 @@ defineProps<Props>();
     </template>
 
     <template #price="{ row }">
-      {{ formatCurrency(row.price) }}
+      <p class="font-semibold text-gray-400">{{ formatCurrency(row.price) }}</p>
+    </template>
+
+    <template #quantity="{ row }">
+      <p class="font-semibold text-gray-400">{{ row.quantity }}</p>
     </template>
 
     <template #subtotal="{ row }">
-      {{ formatCurrency(row.subtotal) }}
+      <p class="font-semibold">
+        {{ formatCurrency(row.subtotal) }}
+      </p>
     </template>
   </DataTable>
 </template>

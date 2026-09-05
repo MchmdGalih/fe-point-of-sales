@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { useOrdersStore } from "@/stores/orders";
+import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import SearchInput from "@/components/ui/search-input/SearchInput.vue";
 import DataTable from "@/components/ui/data-table/DataTable.vue";
@@ -15,6 +16,8 @@ import FilterSelect from "@/components/ui/filter-select/FilterSelect.vue";
 import { ORDER_COLUMNS, ORDER_STATUS_OPTIONS } from "@/const/order";
 
 const orderStore = useOrdersStore();
+const { orders, meta } = storeToRefs(orderStore);
+const { getAllOrders } = orderStore;
 const search = ref("");
 const selectedStatus = ref<OrderStatus | "ALL">("ALL");
 const isLoading = ref(false);
@@ -23,11 +26,11 @@ const fecthOrders = async (page: number = 1) => {
   try {
     isLoading.value = true;
 
-    await orderStore.getAllOrders({
+    await getAllOrders({
       search: search.value,
       page,
       status: selectedStatus.value === "ALL" ? undefined : selectedStatus.value,
-      limit: orderStore.meta.limit,
+      limit: meta.value.limit,
     });
   } finally {
     isLoading.value = false;
@@ -84,8 +87,8 @@ watch(
     <!-- Table -->
     <DataTable
       :columns="ORDER_COLUMNS"
-      :data="orderStore.orders"
-      :meta="orderStore.meta"
+      :data="orders"
+      :meta="meta"
       :loading="isLoading"
       @on-page-change="handlePageChange"
     >

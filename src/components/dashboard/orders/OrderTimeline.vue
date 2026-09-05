@@ -54,18 +54,10 @@ const getSeparatorClass = (step: number) => {
 </script>
 
 <template>
-  <!-- <Card class="px-4 gap-3">
-    <div class="flex items-center gap-x-2 mb-2">
-      <Timer />
-      <h4 class="font-semibold">Timeline</h4>
-    </div>
-   
-  </Card> -->
-
   <AppCard
     :class="'flex flex-col h-full'"
     :header-class="'border-b'"
-    :content-class="'flex-1 space-y-4'"
+    :content-class="'flex-1 space-y-4 '"
     :footer-class="'border-t'"
   >
     <template #header>
@@ -82,7 +74,7 @@ const getSeparatorClass = (step: number) => {
     <template #default>
       <Stepper
         orientation="vertical"
-        class="mx-auto flex w-full max-w-md flex-col justify-start gap-10"
+        class="mx-auto flex w-full flex-col justify-start gap-10"
       >
         <StepperItem
           v-for="step in ORDER_STEPS"

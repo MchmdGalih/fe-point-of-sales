@@ -7,12 +7,14 @@ import { Eye, EyeOff } from "lucide-vue-next";
 
 import { cn } from "@/lib/utils";
 
-const props = defineProps<{
+interface Props {
   modelValue?: string;
   defaultValue?: string;
   placeholder?: string;
   class?: HTMLAttributes["class"];
-}>();
+}
+
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: string): void;
