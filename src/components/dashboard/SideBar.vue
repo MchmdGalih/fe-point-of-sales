@@ -120,7 +120,7 @@ const handleSignOut = async () => {
       <p
         :class="[
           'font-semibold  text-gray-400 mt-2 mb-4',
-          collapsed ? 'text-xs' : 'text-sm',
+          collapsed ? 'text-xs text-center' : 'text-sm',
         ]"
       >
         MENU UTAMA

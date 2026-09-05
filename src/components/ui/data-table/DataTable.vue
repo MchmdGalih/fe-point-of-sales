@@ -65,7 +65,7 @@ const handlePageChange = (page: number) => emit("on-page-change", page);
       <!-- Loading -->
       <template v-if="loading">
         <TableRow v-for="row in 3" :key="row">
-          <TableCell v-for="column in columns" :key="column.key" class="border">
+          <TableCell v-for="column in columns" :key="column.key">
             <Skeleton class="h-4 w-full" />
           </TableCell>
         </TableRow>
@@ -74,17 +74,13 @@ const handlePageChange = (page: number) => emit("on-page-change", page);
       <!-- Data -->
       <template v-else-if="data.length > 0">
         <TableRow v-for="row in data">
-          <TableCell
-            v-for="column in columns"
-            :key="String(column.key)"
-            class="border"
-          >
+          <TableCell v-for="column in columns" :key="String(column.key)">
             <slot :name="String(column.key)" :row="row" :column="column">
               {{ row[column.key] }}
             </slot>
           </TableCell>
 
-          <TableCell v-if="$slots.actions" class="border">
+          <TableCell v-if="$slots.actions">
             <slot name="actions" :row="row" />
           </TableCell>
         </TableRow>
@@ -99,7 +95,7 @@ const handlePageChange = (page: number) => emit("on-page-change", page);
     </TableBody>
 
     <!-- Footer -->
-    <TableFooter class="border bg-slate-100" v-if="meta">
+    <TableFooter v-if="meta">
       <TableCell :colspan="totalColomn" class="w-full">
         <div class="flex items-center justify-between" v-if="meta">
           <p class="text-xs text-slate-500">

@@ -1,54 +1,61 @@
 <script setup lang="ts">
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import type { Payment } from "@/types/payment";
+import AppCard from "@/components/ui/common/AppCard.vue";
+import { getOrderStatusVariant } from "@/helper/order-helper";
+import type { Payment, PaymentStatus } from "@/types/payment";
 import { formatCurrency } from "@/utils/format-currency";
 import { CreditCard } from "lucide-vue-next";
 
 interface Props {
   data: Payment;
   totalAmount: number;
+  status: string;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 </script>
 
 <template>
-  <Card class="px-4 py-4">
-    <CardHeader class="flex flex-col p-2 border-b border-b-gray-200">
-      <div class="flex items-center justify-between">
-        <CardTitle class="font-bold">
+  <AppCard>
+    <template #header>
+      <section class="flex items-center justify-between">
+        <div class="flex flex-col space-y-0">
           <h4 class="font-bold">Pembayaran</h4>
-          <p class="font-semibold text-slate-700">
-            {{ props.data.paymentNumber }}
-          </p>
-        </CardTitle>
-        <Badge variant="success">Paid</Badge>
-      </div>
-    </CardHeader>
-    <CardContent class="flex flex-col px-0">
-      <div class="flex flex-col gap-2 px-2">
-        <div class="text-sm flex items-center justify-between">
-          <p class="font-semibold text-slate-700">Total Pembayaran</p>
-          <span class="font-bold">{{ formatCurrency(props.totalAmount) }}</span>
+          <small class="font-semibold text-slate-400">
+            {{ data.paymentNumber }}
+          </small>
         </div>
-        <div class="font-semibold text-sm flex items-center justify-between">
-          <p>Uang yang dibayarkan</p>
-          <span>{{ formatCurrency(props.data.amount) }}</span>
+
+        <Badge :variant="getOrderStatusVariant(status as PaymentStatus)">{{
+          status
+        }}</Badge>
+      </section>
+    </template>
+
+    <template #default>
+      <div class="flex-1 h-full">
+        <div class="flex items-center justify-between">
+          <p class="font-bold text-xs">Total Pembayaran</p>
+          <p class="font-bold">{{ formatCurrency(totalAmount) }}</p>
         </div>
-        <div class="font-semibold text-sm flex items-center justify-between">
-          <p>Total Kembalian</p>
-          <span>{{ formatCurrency(props.data.change) }}</span>
+        <div class="flex items-center pb-2 border-b justify-between">
+          <p class="font-bold text-xs">Uang yang dibayarkan</p>
+          <p class="font-bold">{{ formatCurrency(data.amount) }}</p>
+        </div>
+        <div class="flex items-center text-green-500 mt-2 justify-between">
+          <p class="font-bold text-xs">Total kembalian</p>
+          <p class="font-bold">{{ formatCurrency(data.change) }}</p>
         </div>
       </div>
-    </CardContent>
-    <CardFooter class="flex items-center px-2 border-t border-t-gray-200">
-      <div class="flex items-center gap-2">
-        <CreditCard color="gray" :size="14" />
-        <p class="text-xs font-semibold">
-          Metode pembayaran: {{ props.data.method }}
-        </p>
-      </div>
-    </CardFooter>
-  </Card>
+    </template>
+
+    <template #footer>
+      <CreditCard color="gray" :size="16" class="mr-2" />
+      <p class="text-xs font-semibold text-slate-400">
+        Metode:
+        {{ data.providerPaymentType ? data.providerPaymentType : "Tunai" }}
+        ({{ data.method }})
+      </p>
+    </template>
+  </AppCard>
 </template>
