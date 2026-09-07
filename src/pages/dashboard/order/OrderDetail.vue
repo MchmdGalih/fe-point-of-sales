@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { api } from "@/services/api";
 import type { OrderDetail } from "@/types/order";
 
@@ -11,6 +11,7 @@ import OrderPaymentCard from "@/components/dashboard/orders/OrderPaymentCard.vue
 import OrderDetailCard from "@/components/dashboard/orders/OrderDetailCard.vue";
 
 const route = useRoute();
+const router = useRouter();
 const detailOrder = ref<OrderDetail | null>(null);
 const isLoading = ref(false);
 
@@ -67,6 +68,10 @@ const fetchOrderDetail = async () => {
 
     if (response.status === 200) {
       detailOrder.value = response.data.data;
+    }
+  } catch (error: Error | any) {
+    if (error.response.status === 404) {
+      return router.replace({ name: "not-found" });
     }
   } finally {
     isLoading.value = false;
