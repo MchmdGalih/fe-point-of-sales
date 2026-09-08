@@ -1,3 +1,4 @@
+import type { PeriodeType } from "@/types/dashboard";
 import type { DataTableColumn } from "@/types/data-table";
 import type { Order, OrderItem, OrderStatus } from "@/types/order";
 
@@ -68,5 +69,24 @@ export const ORDER_STEPS = [
     step: 2,
     title: "Order selesai!",
     description: "Order diselesaikan!",
+  },
+];
+
+export const PERIOD_TREND_ORDER_OPTIONS = [
+  {
+    label: "Hari Ini",
+    value: "today" as PeriodeType,
+  },
+  {
+    label: "Minggu Ini",
+    value: "week" as PeriodeType,
+  },
+  {
+    label: "Bulan Ini",
+    value: "month" as PeriodeType,
+  },
+  {
+    label: "Tahun Ini",
+    value: "year" as PeriodeType,
   },
 ];

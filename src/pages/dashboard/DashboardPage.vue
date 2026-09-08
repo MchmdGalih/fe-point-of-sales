@@ -1,20 +1,31 @@
 <script setup lang="ts">
+import CardLowStock from "@/components/dashboard/home/CardLowStock.vue";
 import CardStats from "@/components/dashboard/home/CardStats.vue";
 import HeaderCard from "@/components/dashboard/home/HeaderCard.vue";
+import { ChartContainer, type ChartConfig } from "@/components/ui/chart";
+import { VisAxis, VisGroupedBar, VisXYContainer } from "@unovis/vue";
 import { useDashboardStore } from "@/stores/dashboard";
+import type { PeriodeType, SalesTrendItem } from "@/types/dashboard";
 import { formatDate } from "@/utils/format-date";
 
 import {
   ChartNoAxesColumnIncreasing,
+  TriangleAlert,
   ShoppingCart,
   User2,
   Wallet,
+  ListFilter,
 } from "lucide-vue-next";
 import { storeToRefs } from "pinia";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
+import FilterSelect from "@/components/ui/filter-select/FilterSelect.vue";
+import { PERIOD_TREND_ORDER_OPTIONS } from "@/const/order";
 const dashboardStore = useDashboardStore();
-const { summary } = storeToRefs(dashboardStore);
+const { summary, lowStock, salesTrendData } = storeToRefs(dashboardStore);
+
+const { getDashboardSummary, getLowStock, getSalesTrend } = dashboardStore;
+
 const isLoading = ref(false);
 
 export type TrendType = "up" | "down";
@@ -52,21 +63,52 @@ const cardStats = computed(() => [
   },
 ]);
 
-const fetchOrderSummary = async () => {
-  try {
-    isLoading.value = true;
-    const response = await dashboardStore.getDashboardSummary();
+const totalItemsStockLow = computed(() => lowStock.value.length);
+const selectedSalesTrendPeriode = ref<PeriodeType>("week");
 
-    if (!response?.status) {
-      toast.error(response?.message);
+const chartData = computed(() => {
+  return salesTrendData.value.salesTrend.map((sales) => {
+    return {
+      ...sales,
+      date: formatDate(sales.date),
+    };
+  });
+});
+
+console.log(chartData.value);
+const fetchDashboard = async () => {
+  try {
+    const response = await Promise.all([
+      getDashboardSummary(),
+      getLowStock(),
+      getSalesTrend(selectedSalesTrendPeriode.value),
+    ]);
+
+    if (!response.every((res) => res.status)) {
+      toast.error(response.find((res) => !res.status)?.message);
     }
   } finally {
     isLoading.value = false;
   }
 };
 
+const chartConfig = {
+  desktop: {
+    label: "Desktop",
+    color: "#00000",
+  },
+  mobile: {
+    label: "Mobile",
+    color: "#60a5fa",
+  },
+} satisfies ChartConfig;
+
+watch(selectedSalesTrendPeriode, async () => {
+  await getSalesTrend(selectedSalesTrendPeriode.value);
+});
+
 onMounted(() => {
-  fetchOrderSummary();
+  fetchDashboard();
 });
 </script>
 
@@ -103,18 +145,94 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Cart Dashboard -->
-
     <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
-      <div
-        class="w-full h-24 border rounded-md col-span-2 flex items-center justify-center bg-white"
-      >
-        <h1 class="font-bold text-2xl">Grafik Penjualan</h1>
+      <!-- Cart Dashboard -->
+
+      <div class="w-full h-full border rounded-md col-span-2 bg-white">
+        <div class="flex items-center p-4 gap-4">
+          <h1>Grafik Penjualan:</h1>
+          <FilterSelect
+            v-model="selectedSalesTrendPeriode"
+            :options="PERIOD_TREND_ORDER_OPTIONS"
+            placeholder="Filter Periode"
+          >
+            <template #icon>
+              <ListFilter class="size-5" />
+            </template>
+          </FilterSelect>
+        </div>
+        <div
+          v-if="!chartData.length"
+          class="w-full h-full flex justify-center items-center border"
+        >
+          <h1 class="text-orange-700 font-bold">
+            Grafik Penjualan untuk hari ini Belum Tersedia!
+          </h1>
+        </div>
+
+        <ChartContainer :config="chartConfig" v-else>
+          <VisXYContainer :data="chartData">
+            <VisGroupedBar
+              :x="(d: SalesTrendItem) => d.date"
+              :y="[
+                (d: SalesTrendItem) => d.revenue,
+                (d: SalesTrendItem) => d.totalOrders,
+              ]"
+              :color="[chartConfig.desktop.color, chartConfig.mobile.color]"
+              :rounded-corners="4"
+              bar-padding="0.1"
+              group-padding="0"
+            />
+            <VisAxis
+              type="x"
+              :x="(d: SalesTrendItem) => d.date"
+              :tick-line="false"
+              :domain-line="false"
+              :grid-line="false"
+              :tick-format="
+                (d: number) => {
+                  const date = new Date(d);
+                  return date.toLocaleDateString('en-US', {
+                    month: 'short',
+                  });
+                }
+              "
+            />
+            <VisAxis
+              type="y"
+              :tick-format="
+                (d: number) => {
+                  return new Intl.NumberFormat('id-ID', {
+                    notation: 'compact',
+                    maximumFractionDigits: 1,
+                  }).format(d);
+                }
+              "
+              :tick-line="false"
+              :domain-line="false"
+              :grid-line="true"
+            />
+          </VisXYContainer>
+        </ChartContainer>
       </div>
+
+      <!-- Stock Dashboard -->
       <div
-        class="w-full h-24 border flex items-center justify-center rounded-md col-span-1 bg-white"
+        class="w-full border rounded-md col-span-1 flex flex-col gap-2 p-4 bg-white"
       >
-        <h1 class="font-bold text-2xl">Grafik Produk</h1>
+        <div class="flex items-center gap-2 space-x-2">
+          <TriangleAlert color="orange" :size="20" />
+          <h1 class="font-semibold text-orange-700">
+            Stock Terendah ({{ totalItemsStockLow }} Item)
+          </h1>
+        </div>
+        <CardLowStock
+          v-for="item in lowStock"
+          :key="item.id"
+          :name="item.name"
+          :stock="item.stock"
+          :icon="TriangleAlert"
+        />
       </div>
     </div>
   </div>

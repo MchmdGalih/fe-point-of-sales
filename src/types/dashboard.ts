@@ -8,3 +8,22 @@ export interface DashboardSummary {
   totalCustomers: number;
   averageOrderValue: number;
 }
+
+export interface LowStock {
+  id: string;
+  name: string;
+  stock: number;
+}
+
+export type PeriodeType = "today" | "week" | "month" | "year" | "custom";
+
+export interface SalesTrend {
+  period: PeriodeType;
+  salesTrend: SalesTrendItem[];
+}
+
+export interface SalesTrendItem {
+  date: Date;
+  totalOrders: number;
+  revenue: number;
+}
