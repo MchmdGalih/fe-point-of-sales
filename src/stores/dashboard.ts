@@ -2,6 +2,7 @@ import { api } from "@/services/api";
 import type {
   DashboardSummary,
   LowStock,
+  PaymentMethodChartItem,
   PeriodeType,
   SalesTrend,
 } from "@/types/dashboard";
@@ -26,6 +27,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     period: "year",
     salesTrend: [],
   });
+  const dataPaymentMethod = ref<PaymentMethodChartItem[]>([]);
 
   async function getDashboardSummary() {
     try {
@@ -88,12 +90,34 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
+  async function getPaymentMethodBreakDown() {
+    try {
+      const response = await api.get("/dashboard/payment-method");
+
+      const { data, message } = response.data;
+
+      dataPaymentMethod.value = data;
+
+      return {
+        status: true,
+        message: message,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        message: getApiErrorMessage(error),
+      };
+    }
+  }
+
   return {
     summary,
     lowStock,
     salesTrendData,
+    dataPaymentMethod,
     getDashboardSummary,
     getLowStock,
     getSalesTrend,
+    getPaymentMethodBreakDown,
   };
 });

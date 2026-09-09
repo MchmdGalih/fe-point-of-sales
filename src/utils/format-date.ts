@@ -1,7 +1,6 @@
-export const formatDate = (value: string | Date) => {
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(new Date(value));
+export const formatDate = (
+  value: string | Date | number,
+  options?: Intl.DateTimeFormatOptions,
+) => {
+  return new Intl.DateTimeFormat("id-ID", options).format(new Date(value));
 };

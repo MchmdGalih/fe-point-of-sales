@@ -1,3 +1,5 @@
+import type { PaymentMethod } from "./payment";
+
 export interface DashboardSummary {
   totalOrders: number;
   revenue: number;
@@ -15,7 +17,7 @@ export interface LowStock {
   stock: number;
 }
 
-export type PeriodeType = "today" | "week" | "month" | "year" | "custom";
+export type PeriodeType = "day" | "week" | "month" | "year";
 
 export interface SalesTrend {
   period: PeriodeType;
@@ -26,4 +28,10 @@ export interface SalesTrendItem {
   date: Date;
   totalOrders: number;
   revenue: number;
+}
+
+export interface PaymentMethodChartItem {
+  method: PaymentMethod;
+  transactionCount: number;
+  amount: number;
 }
